@@ -61,7 +61,7 @@ public class WhatsAppClient {
                                     String buttonLabel, List<Map<String, String>> rows) {
         List<Map<String, Object>> wrappedRows = rows.stream()
                 .map(r -> {
-                    var m = new java.util.LinkedHashMap<String, Object>();
+                    Map<String, Object> m = new java.util.LinkedHashMap<>();
                     m.put("id", r.get("id"));
                     m.put("title", r.get("title"));
                     if (r.containsKey("description")) m.put("description", r.get("description"));
