@@ -1,0 +1,17 @@
+package pet.liro.chimi.wpp.bot;
+
+public enum BotState {
+    IDLE,
+    MAIN_MENU,
+    APPT_PICK_TYPE,
+    APPT_PICK_DATE,
+    APPT_PICK_SLOT,
+    APPT_TUTOR_FIRST_NAME,
+    APPT_TUTOR_LAST_NAME,
+    APPT_PET_FIRST_NAME,
+    APPT_PET_LAST_NAME,
+    APPT_CONFIRM,
+    FAQ_PICK_CATEGORY,
+    FAQ_PICK_QUESTION,
+    HUMAN_HANDOFF
+}

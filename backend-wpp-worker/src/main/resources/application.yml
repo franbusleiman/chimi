@@ -1,0 +1,55 @@
+spring:
+  application:
+    name: chimi-wpp-worker
+
+  datasource:
+    url: jdbc:mysql://${MYSQL_HOST:localhost}:${MYSQL_PORT:3306}/${MYSQL_DATABASE:chimi}?useSSL=${MYSQL_USE_SSL:false}&serverTimezone=UTC&allowPublicKeyRetrieval=true&characterEncoding=utf8&useUnicode=true
+    username: ${MYSQL_USER:chimi_app}
+    password: ${MYSQL_PASSWORD:changeme}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    hikari:
+      maximum-pool-size: 6
+      minimum-idle: 1
+      pool-name: chimi-wpp-hikari
+
+  jpa:
+    hibernate:
+      ddl-auto: none
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQLDialect
+        jdbc:
+          time_zone: UTC
+    open-in-view: false
+
+server:
+  port: 8080
+  forward-headers-strategy: framework
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: never
+      probes:
+        enabled: true
+
+chimi:
+  wpp:
+    verify-token: ${WPP_VERIFY_TOKEN:dev-verify-token}
+    access-token: ${WPP_ACCESS_TOKEN:}
+    phone-number-id: ${WPP_PHONE_NUMBER_ID:}
+    business-account-id: ${WPP_BUSINESS_ACCOUNT_ID:}
+    api-version: ${WPP_API_VERSION:v21.0}
+    graph-base-url: ${WPP_GRAPH_BASE_URL:https://graph.facebook.com}
+  api:
+    base-url: ${API_INTERNAL_URL:http://chimi-api:8080}
+    internal-key: ${INTERNAL_API_KEY:dev-only-internal-key}
+
+logging:
+  level:
+    root: INFO
+    pet.liro.chimi: DEBUG

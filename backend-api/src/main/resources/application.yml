@@ -1,0 +1,61 @@
+spring:
+  application:
+    name: chimi-api
+
+  datasource:
+    url: jdbc:mysql://${MYSQL_HOST:localhost}:${MYSQL_PORT:3306}/${MYSQL_DATABASE:chimi}?useSSL=${MYSQL_USE_SSL:false}&serverTimezone=UTC&allowPublicKeyRetrieval=true&characterEncoding=utf8&useUnicode=true
+    username: ${MYSQL_USER:chimi_app}
+    password: ${MYSQL_PASSWORD:changeme}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 2
+      connection-timeout: 30000
+      pool-name: chimi-api-hikari
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQLDialect
+        jdbc:
+          time_zone: UTC
+        format_sql: false
+    open-in-view: false
+
+  flyway:
+    enabled: true
+    baseline-on-migrate: true
+    locations: classpath:db/migration
+
+server:
+  port: 8080
+  forward-headers-strategy: framework
+  compression:
+    enabled: true
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      show-details: when-authorized
+      probes:
+        enabled: true
+
+chimi:
+  jwt:
+    secret: ${JWT_SECRET:dev-only-secret-not-for-production-please-change}
+    expiration-minutes: ${JWT_EXPIRATION_MINUTES:480}
+  internal:
+    api-key: ${INTERNAL_API_KEY:dev-only-internal-key}
+
+logging:
+  level:
+    root: INFO
+    pet.liro.chimi: DEBUG
+    org.hibernate.SQL: WARN
+    org.springframework.security: INFO

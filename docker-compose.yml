@@ -1,0 +1,102 @@
+name: chimi
+
+networks:
+  chimi-net:
+    driver: bridge
+
+services:
+  chimi-api:
+    build:
+      context: ./backend-api
+      dockerfile: Dockerfile
+    image: chimi/api:latest
+    container_name: chimi-api
+    restart: unless-stopped
+    environment:
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-prod}
+      TZ: ${TZ:-America/Argentina/Buenos_Aires}
+      JAVA_OPTS: ${JAVA_OPTS:--XX:MaxRAMPercentage=75 -XX:+UseG1GC}
+      MYSQL_HOST: ${MYSQL_HOST}
+      MYSQL_PORT: ${MYSQL_PORT}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      MYSQL_USE_SSL: ${MYSQL_USE_SSL:-false}
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_EXPIRATION_MINUTES: ${JWT_EXPIRATION_MINUTES:-480}
+      INTERNAL_API_KEY: ${INTERNAL_API_KEY}
+    # En Linux, para que el contenedor llegue a MySQL en el host:
+    # extra_hosts:
+    #   - "host.docker.internal:host-gateway"
+    ports:
+      - "${API_HOST_PORT:-18080}:8080"
+    networks:
+      - chimi-net
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://localhost:8080/actuator/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 60s
+
+  chimi-wpp-worker:
+    build:
+      context: ./backend-wpp-worker
+      dockerfile: Dockerfile
+    image: chimi/wpp-worker:latest
+    container_name: chimi-wpp-worker
+    restart: unless-stopped
+    depends_on:
+      chimi-api:
+        condition: service_healthy
+    environment:
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-prod}
+      TZ: ${TZ:-America/Argentina/Buenos_Aires}
+      JAVA_OPTS: ${JAVA_OPTS:--XX:MaxRAMPercentage=75 -XX:+UseG1GC}
+      MYSQL_HOST: ${MYSQL_HOST}
+      MYSQL_PORT: ${MYSQL_PORT}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      MYSQL_USE_SSL: ${MYSQL_USE_SSL:-false}
+      WPP_VERIFY_TOKEN: ${WPP_VERIFY_TOKEN}
+      WPP_ACCESS_TOKEN: ${WPP_ACCESS_TOKEN}
+      WPP_PHONE_NUMBER_ID: ${WPP_PHONE_NUMBER_ID}
+      WPP_BUSINESS_ACCOUNT_ID: ${WPP_BUSINESS_ACCOUNT_ID}
+      WPP_API_VERSION: ${WPP_API_VERSION:-v21.0}
+      WPP_GRAPH_BASE_URL: ${WPP_GRAPH_BASE_URL:-https://graph.facebook.com}
+      API_INTERNAL_URL: ${API_INTERNAL_URL:-http://chimi-api:8080}
+      INTERNAL_API_KEY: ${INTERNAL_API_KEY}
+    # extra_hosts:
+    #   - "host.docker.internal:host-gateway"
+    ports:
+      - "${WPP_WORKER_HOST_PORT:-18081}:8080"
+    networks:
+      - chimi-net
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://localhost:8080/actuator/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 60s
+
+  chimi-front:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        VITE_BASE_PATH: ${VITE_BASE_PATH:-/chimi/}
+        VITE_API_BASE_URL: ${VITE_API_BASE_URL:-/chimi/api}
+    image: chimi/front:latest
+    container_name: chimi-front
+    restart: unless-stopped
+    ports:
+      - "${FRONT_HOST_PORT:-18082}:80"
+    networks:
+      - chimi-net
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost/"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
