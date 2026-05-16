@@ -3,6 +3,8 @@ package pet.liro.chimi.domain.conversation;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 import pet.liro.chimi.domain.common.TenantAwareEntity;
 
 import java.time.Instant;
@@ -29,7 +31,7 @@ public class WppMessage extends TenantAwareEntity {
     @Column(name = "type", length = 30)
     private String type;
 
-    @Lob
+    @JdbcTypeCode(SqlTypes.LONGVARCHAR)
     @Column(name = "body")
     private String body;
 

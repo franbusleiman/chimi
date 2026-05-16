@@ -3,6 +3,8 @@ package pet.liro.chimi.wpp.domain;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 import java.time.Instant;
 
@@ -25,7 +27,7 @@ public class Conversation {
     @Column(nullable = false, length = 50)
     private String state = "IDLE";
 
-    @Lob
+    @JdbcTypeCode(SqlTypes.LONGVARCHAR)
     @Column(name = "context_json")
     private String contextJson;
 
